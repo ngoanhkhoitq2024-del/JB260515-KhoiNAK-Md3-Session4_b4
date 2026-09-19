@@ -1,9 +1,7 @@
 package re.edu.api.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import re.edu.api.dto.InstructorCreateRequest;
 import re.edu.api.model.Instructor;
 import re.edu.api.repository.IInstructorRepository;

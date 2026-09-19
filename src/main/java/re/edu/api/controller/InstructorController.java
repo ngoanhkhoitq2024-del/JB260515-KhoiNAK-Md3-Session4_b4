@@ -1,9 +1,10 @@
 package re.edu.api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import re.edu.api.dto.ApiResponse;
 import re.edu.api.dto.InstructorCreateRequest;
 import re.edu.api.model.Instructor;
 import re.edu.api.service.InstructorService;
@@ -11,55 +12,66 @@ import re.edu.api.service.InstructorService;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/instructors")
 public class InstructorController {
     private final InstructorService instructorService;
 
-    @Autowired
-    public InstructorController(InstructorService instructorService) {
-        this.instructorService = instructorService;
-    }
-
     // Lấy full ds
     @GetMapping
-    public ResponseEntity<List<Instructor>> getAllInstructors() {
-        return ResponseEntity.ok(instructorService.findAllInstructors());
+    public ResponseEntity<ApiResponse<List<Instructor>>> getAllInstructors() {
+        List<Instructor> instructors = instructorService.findAllInstructors();
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                true, "Lấy danh sách giảng viên thành công", instructors));
     }
 
     // Lấy theo id
     @GetMapping("/{id}")
-    public ResponseEntity<Instructor> getInstructorById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Instructor>> getInstructorById(@PathVariable Long id) {
         Instructor instructor = instructorService.findInstructorById(id);
+
         if (instructor == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(
+                    false, "Không tìm thấy giảng viên với ID: " + id, null));
         }
-        return ResponseEntity.ok(instructor);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true, "Lấy giảng viên thành công", instructor));
     }
 
     // Thêm
     @PostMapping
-    public ResponseEntity<Instructor> createInstructor(@RequestBody InstructorCreateRequest instructorDto) {
-        Instructor newInstructor = instructorService.createInstructor(instructorDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newInstructor);
+    public ResponseEntity<ApiResponse<Void>> createInstructor(
+            @RequestBody InstructorCreateRequest req) {
+
+        instructorService.createInstructor(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                true, "Tạo giảng viên thành công", null));
     }
 
     // Cập nhật
     @PutMapping("/{id}")
-    public ResponseEntity<Instructor> updateInstructor(@PathVariable Long id, @RequestBody Instructor instructor) {
+    public ResponseEntity<ApiResponse<Void>> updateInstructor(
+            @PathVariable Long id,
+            @RequestBody Instructor instructor) {
         Instructor updatedInstructor = instructorService.updateInstructor(id, instructor);
         if (updatedInstructor == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(
+                    false, "Không tìm thấy giảng viên với ID: " + id, null));
         }
-        return ResponseEntity.ok(updatedInstructor);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true, "Cập nhật giảng viên thành công", null));
     }
 
     // Xóa
     @DeleteMapping("/{id}")
-    public ResponseEntity<Instructor> deleteInstructor(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteInstructor(@PathVariable Long id) {
         Instructor deletedInstructor = instructorService.deleteInstructorById(id);
         if (deletedInstructor == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(
+                    false, "Không tìm thấy giảng viên với ID: " + id, null));
         }
-        return ResponseEntity.ok(deletedInstructor);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true, "Xóa giảng viên thành công", null));
     }
 }
